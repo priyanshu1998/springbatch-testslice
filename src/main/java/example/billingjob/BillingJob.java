@@ -26,8 +26,10 @@ public class BillingJob implements Job {
 
     @Override
     public void execute(JobExecution execution) {
+        JobParameters jobParameters = execution.getJobParameters();
+        String inputFile = jobParameters.getString("input.file");
         try {
-            System.out.println("processing billing information");
+            System.out.println("processing billing information from file " + inputFile);
             execution.setStatus(BatchStatus.COMPLETED);
             execution.setExitStatus(ExitStatus.COMPLETED);
 //            throw new Exception("Unable to process billing information");
