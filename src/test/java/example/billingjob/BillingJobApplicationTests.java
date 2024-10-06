@@ -18,6 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.TransactionManager;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -53,17 +56,17 @@ class BillingJobApplicationTests {
 	void testJobExecution(CapturedOutput output) throws Exception {
 		// given
 		JobParameters jobParameters = new JobParametersBuilder()
-				.addString("input.file", "/some/input/file")
-				.addString("file.format", "csv", false)
+				.addString("input.file", "input/billing-2023-03.csv")
 				.toJobParameters();
-		// when
 		var jobLauncher = context.getBean(JobLauncher.class);
 		var job = context.getBean(Job.class);
 
+		// when
 		JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+
 		// then
-		Assertions.assertTrue(output.getOut().contains("processing billing information from file /some/input/file"));
 		Assertions.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-01.csv")));
 	}
 
 }
