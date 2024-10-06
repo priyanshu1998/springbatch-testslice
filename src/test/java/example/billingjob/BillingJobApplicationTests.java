@@ -17,6 +17,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.TransactionManager;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -37,7 +39,9 @@ class BillingJobApplicationTests {
 	@BeforeEach
 	void tearDown() {
 		this.jobRepositoryTestUtils.removeJobExecutions();
+		JdbcTestUtils.deleteFromTables(context.getBean(JdbcTemplate.class), "billing_data");
 	}
+
 
 
 	@Test
@@ -67,6 +71,9 @@ class BillingJobApplicationTests {
 		// then
 		Assertions.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
 		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-01.csv")));
+
+		var jdbcTemplate = context.getBean(JdbcTemplate.class);
+		Assertions.assertEquals(1000, JdbcTestUtils.countRowsInTable(jdbcTemplate, "billing_data"));
 	}
 
 }
