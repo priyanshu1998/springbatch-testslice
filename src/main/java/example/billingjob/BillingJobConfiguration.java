@@ -88,7 +88,8 @@ public class BillingJobConfiguration {
           JobRepository jobRepository, PlatformTransactionManager transactionManager,
           @Qualifier("billingDataFileReader") FlatFileItemReader<BillingData> fromFlatFile,
           @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toRDBMSTable) {
-    return new StepBuilder("fileIngestion", jobRepository)
+    String stepName = decorateStepName("ingestDataStep");
+    return new StepBuilder(stepName, jobRepository)
             .<BillingData, BillingData>chunk(100, transactionManager)
             .reader(fromFlatFile)
             .writer(toRDBMSTable)
@@ -136,7 +137,8 @@ public class BillingJobConfiguration {
                     JdbcCursorItemReader<BillingData> billingDataTableReader,
                     ItemProcessor<BillingData, ReportingData> billingDataProcessor,
                     FlatFileItemWriter<ReportingData> billingDataFileWriter) {
-    return new StepBuilder("reportGeneration", jobRepository)
+    String stepName = decorateStepName("generateFileStep");
+    return new StepBuilder(stepName, jobRepository)
             .<BillingData, ReportingData>chunk(100, transactionManager)
             .reader(billingDataTableReader)
             .processor(billingDataProcessor)
