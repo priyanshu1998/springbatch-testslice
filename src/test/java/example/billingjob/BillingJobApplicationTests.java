@@ -4,20 +4,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
-import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
-import org.springframework.transaction.TransactionManager;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.nio.file.Files;
@@ -31,48 +30,54 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @lombok.RequiredArgsConstructor
+@Sql(statements = BillingJobApplicationTests.CREATE_BILLING_TABLE)
 class BillingJobApplicationTests {
 
-	private final ConfigurableApplicationContext context;
 	private final JobRepositoryTestUtils jobRepositoryTestUtils;
+	private final JobLauncherTestUtils jobLauncherTestUtils;
+	private final JdbcTemplate jdbcTemplate;
+
+	public static final String CREATE_BILLING_TABLE = """
+		CREATE TABLE IF NOT EXISTS billing_data (
+			data_year INTEGER,
+			data_month INTEGER,
+			account_id INTEGER,
+			phone_number VARCHAR(12),
+			data_usage DOUBLE PRECISION,
+			call_duration INTEGER,
+			sms_count INTEGER
+		);
+	""";
+
 
 	@BeforeEach
 	void tearDown() {
 		this.jobRepositoryTestUtils.removeJobExecutions();
-		JdbcTestUtils.deleteFromTables(context.getBean(JdbcTemplate.class), "billing_data");
+		JdbcTestUtils.deleteFromTables(jdbcTemplate, "billing_data");
 	}
 
 
 
 	@Test
 	void contextLoads() {
-		assertThat(AssertableApplicationContext.get(() -> context)) //
-				.hasSingleBean(JobRepository.class)
-				.hasSingleBean(TransactionManager.class)
-				.satisfies(ctx -> {
-					// assert that correct job bean is present
-					assertThat(ctx.getBean(Job.class).getName())
-							.isEqualTo("BillingJob");
-				});
+		assertThat(jobLauncherTestUtils.getJob().getName())
+				.isEqualTo("BillingJob");
 	}
 
 	@Test
-	void testJobExecution(CapturedOutput output) throws Exception {
+	void testJobExecution() throws Exception {
 		// given
 		JobParameters jobParameters = new JobParametersBuilder()
-				.addString("input.file", "input/billing-2023-03.csv")
+				.addString("input.file", "input/billing-2023-02.csv")
 				.toJobParameters();
-		var jobLauncher = context.getBean(JobLauncher.class);
-		var job = context.getBean(Job.class);
 
 		// when
-		JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+		JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
 		// then
-		Assertions.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+		Assertions.assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-01.csv")));
 
-		var jdbcTemplate = context.getBean(JdbcTemplate.class);
 		Assertions.assertEquals(1000, JdbcTestUtils.countRowsInTable(jdbcTemplate, "billing_data"));
 	}
 
