@@ -1,6 +1,6 @@
 package example.billingjob.entity;
 
-@lombok.Getter
+@lombok.Getter()
 @lombok.Setter
 @lombok.RequiredArgsConstructor
 public class BillingData {
