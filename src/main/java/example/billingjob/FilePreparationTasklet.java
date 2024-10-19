@@ -4,6 +4,7 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.lang.NonNull;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,7 +16,7 @@ public class FilePreparationTasklet implements Tasklet {
     public static final String STAGING = "staging";
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(@NonNull StepContribution contribution, ChunkContext chunkContext) throws Exception {
         var jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
         var inputFile = Optional.ofNullable(jobParameters.getString("input.file"));

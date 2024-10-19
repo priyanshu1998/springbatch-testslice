@@ -5,8 +5,6 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -49,7 +46,7 @@ public class BillingJobConfiguration {
   public FlatFileItemReader<BillingData> billingDataFileReader() {
     return new FlatFileItemReaderBuilder<BillingData>()
             .name("billingDataFileReader")
-            .resource(new FileSystemResource("staging/billing-2023-01.csv"))
+            .resource(new FileSystemResource("staging/billing-2023-02.csv"))
             .delimited()
             .names("dataYear", "dataMonth", "accountId", "phoneNumber", "dataUsage", "callDuration", "smsCount")
             .targetType(BillingData.class)

@@ -76,7 +76,7 @@ class BillingJobApplicationTests {
 
 		// then
 		Assertions.assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
-		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-01.csv")));
+		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-02.csv")));
 
 		Assertions.assertEquals(1000, JdbcTestUtils.countRowsInTable(jdbcTemplate, "billing_data"));
 	}
