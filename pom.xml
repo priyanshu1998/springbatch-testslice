@@ -77,6 +77,23 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<encoding>UTF-8</encoding>
+					<charSet>UTF-8</charSet>
+					<docencoding>UTF-8</docencoding>
+					<author>true</author>
+					<version>true</version>
+					<links>
+						<link>https://docs.oracle.com/javase/8/docs/api/</link>
+					</links>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

@@ -5,6 +5,7 @@ import example.billingjob.entity.BillingData;
 import example.billingjob.entity.ReportingData;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
+import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -13,6 +14,7 @@ import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -87,12 +89,17 @@ public class BillingJobConfiguration {
   public Step ingestDataStep(
           JobRepository jobRepository, PlatformTransactionManager transactionManager,
           @Qualifier("billingDataFileReader") FlatFileItemReader<BillingData> fromFlatFile,
-          @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toRDBMSTable) {
+          @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toRDBMSTable,
+          @Qualifier("skipListener") SkipListener<BillingData, BillingData> skipListener) {
     String stepName = decorateStepName("ingestDataStep");
     return new StepBuilder(stepName, jobRepository)
             .<BillingData, BillingData>chunk(100, transactionManager)
             .reader(fromFlatFile)
             .writer(toRDBMSTable)
+            .faultTolerant()
+            .skip(FlatFileParseException.class)
+            .skipLimit(10)
+            .listener(skipListener)
             .build();
   }
   // ===================================================================================================
@@ -162,4 +169,17 @@ public class BillingJobConfiguration {
             .next(fromRDBMSToFlatFile)
             .build();
   }
+
+
+// Listener ==================================================================================================
+
+  @Bean
+  @StepScope
+  public BillingDataSkipListener skipListener(@Value("#{jobParameters['skip.file']}") String skippedFile) {
+    return new BillingDataSkipListener(skippedFile);
+  }
+
 }
+
+
+
