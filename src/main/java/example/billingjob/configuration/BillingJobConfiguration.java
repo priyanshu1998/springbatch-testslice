@@ -1,0 +1,48 @@
+package example.billingjob.configuration;
+
+import example.listener.BillingDataSkipListener;
+import example.validator.BillingJobParametersValidator;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParametersValidator;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.batch.core.Step;
+
+@Configuration
+@ConfigurationPropertiesScan("example.billingjob.configuration.property")
+public class BillingJobConfiguration {
+
+  // Job ===================================================================================================
+  @Bean
+  public Job job(JobRepository jobRepository,
+                 @Qualifier("filePreparationStep") Step prepareFlatFile,
+                 @Qualifier("ingestBillingDataStep") Step ingestBillingDataToRdbms,
+                 @Qualifier("generateBillingTotalDataStep") Step readFromRdbmsGenerateBillingTotalDataAsCsvFile) {
+    JobParametersValidator validateInputFileParam = new BillingJobParametersValidator();
+
+    return new JobBuilder("BillingJob", jobRepository)
+            .validator(validateInputFileParam)
+            .start(prepareFlatFile)
+            .next(ingestBillingDataToRdbms)
+            .next(readFromRdbmsGenerateBillingTotalDataAsCsvFile)
+            .build();
+  }
+
+
+// Listener ==================================================================================================
+
+  @Bean
+  @StepScope
+  public BillingDataSkipListener parseFailListener(@Value("#{jobParameters['skip.file']}") String skippedFile) {
+    return new BillingDataSkipListener(skippedFile);
+  }
+}
+
+
+

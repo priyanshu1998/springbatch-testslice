@@ -1,7 +1,6 @@
-package example.billingjob.entity;
+package example.model;
 
-@lombok.Getter
-@lombok.Setter
+@lombok.Data
 @lombok.AllArgsConstructor
 public class ReportingData {
     BillingData billingData;

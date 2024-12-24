@@ -1,6 +1,6 @@
-package example.billingjob;
+package example.listener;
 
-import example.billingjob.entity.BillingData;
+import example.model.BillingData;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.lang.NonNull;

@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.nio.file.Files;
@@ -29,9 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@SpringBatchTest
+@SpringJUnitConfig
 @ActiveProfiles("test")
+@SpringBatchTest
 @ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @lombok.RequiredArgsConstructor

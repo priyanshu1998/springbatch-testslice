@@ -1,4 +1,4 @@
-package example.billingjob;
+package example.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
