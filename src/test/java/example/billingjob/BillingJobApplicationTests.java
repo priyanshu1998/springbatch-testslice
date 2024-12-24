@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -13,13 +12,11 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.nio.file.Files;
@@ -27,16 +24,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-@SpringJUnitConfig
-@ActiveProfiles("test")
+
+@SpringBootTest(
+		classes = BillingJobApplication.class,
+		webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @SpringBatchTest
+@ActiveProfiles("test")
 @ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
+@Sql(statements = BillingJobApplicationTests.CREATE_BILLING_TABLE,
+		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @lombok.RequiredArgsConstructor
-@Sql(statements = BillingJobApplicationTests.CREATE_BILLING_TABLE)
 class BillingJobApplicationTests {
 
 	private final JobRepositoryTestUtils jobRepositoryTestUtils;
