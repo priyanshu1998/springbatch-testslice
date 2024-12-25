@@ -10,6 +10,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.test.context.SpringBatchTest;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.TestConstructor;
@@ -27,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @lombok.RequiredArgsConstructor
 class FilePreparationStepConfigurationTest {
-    private final Step step;
     private final StepRunner stepRunner;
 
     @Test
@@ -39,7 +39,7 @@ class FilePreparationStepConfigurationTest {
     }
 
     @Test
-    void testExecute(){
+    void testExecute(@Qualifier("filePreparationStep") Step step){
         JobParameters jobParameters = getJobParameters();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
