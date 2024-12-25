@@ -9,7 +9,6 @@ import org.springframework.batch.support.transaction.ResourcelessTransactionMana
 import org.springframework.batch.test.StepRunner;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -18,7 +17,6 @@ import javax.sql.DataSource;
 
 @TestConfiguration
 @EnableBatchProcessing
-@Import(DefaultBatchConfiguration.class)
 public class BatchConfig {
     @Bean
     public DataSource dataSource() {
