@@ -14,8 +14,26 @@ public class PricingProperties {
     private float callRate = 0.5f;
     private float smsRate = 0.1f;
 
+    @lombok.Generated
+    public float dataRate(){
+        return dataRate;
+    }
+
+    @lombok.Generated
+    public float callRate(){
+        return callRate;
+    }
+
+    @lombok.Generated
+    public float smsRate(){
+        return smsRate;
+    }
+
+
+
+
     @PostConstruct
     void init(){
-        log.info(this.toString());
+        log.debug(this.toString());
     }
 }

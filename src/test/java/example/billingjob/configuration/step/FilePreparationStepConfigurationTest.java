@@ -3,6 +3,7 @@ package example.billingjob.configuration.step;
 import example.billingjob.configuration.BatchConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBatchTest
 @SpringJUnitConfig(classes = {BatchConfig.class, FilePreparationStepConfiguration.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @lombok.RequiredArgsConstructor
 class FilePreparationStepConfigurationTest {
     private final StepRunner stepRunner;
@@ -45,7 +47,7 @@ class FilePreparationStepConfigurationTest {
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
         assertEquals(jobExecution.getExitStatus(), ExitStatus.COMPLETED);
 
-        Path billingReport = Paths.get("staging", "billing-report-2023-01.csv");
+        Path billingReport = Paths.get("staging", "billing-2023-01.csv");
         Assertions.assertTrue(Files.exists(billingReport));
     }
 

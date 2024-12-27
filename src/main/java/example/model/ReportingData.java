@@ -2,7 +2,8 @@ package example.model;
 
 @lombok.Data
 @lombok.AllArgsConstructor
+@lombok.experimental.FieldNameConstants
 public class ReportingData {
-    BillingData billingData;
-    double billingTotal;
+    private BillingData billingData;
+    private double billingTotal;
 }

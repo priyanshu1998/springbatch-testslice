@@ -3,29 +3,34 @@ package example.processor;
 import example.billingjob.service.PricingService;
 import example.model.BillingData;
 import example.model.ReportingData;
+import jakarta.annotation.PostConstruct;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
 
 @lombok.RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class BillingDataProcessor implements ItemProcessor<BillingData, ReportingData> {
 
-    final PricingService pricingService;
-
-    @Value("${cellular.plan.spending-threshold:150.0f}")
-    private float spendingThreshold;
+    private final PricingService pricingService;
+    private final float spendingThreshold;
 
     @Override
     public ReportingData process(BillingData item) {
 
         double billingTotal =
-                item.getDataUsage()     * pricingService.getDataPricing() +
-                item.getCallDuration()  * pricingService.getCallPricing() +
-                item.getSmsCount()      * pricingService.getSmsPricing()  ;
+                item.dataUsage()     * pricingService.getDataPricing() +
+                item.callDuration()  * pricingService.getCallPricing() +
+                item.smsCount()      * pricingService.getSmsPricing()  ;
 
         if (billingTotal < spendingThreshold) {
             return null;
         }
 
         return new ReportingData(item, billingTotal);
+    }
+
+    @PostConstruct
+    void init(){
+        log.debug("processor: BillingDataProcessor, spendingThreshold: {}", spendingThreshold);
     }
 }

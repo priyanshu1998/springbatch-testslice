@@ -15,14 +15,14 @@ public class PricingService {
 //        if (randVal %  2 == 0) {
 //            throw new PricingException("Error while retrieving data pricing");
 //        }
-        return props.getDataRate();
+        return props.dataRate();
     }
 
     public float getCallPricing() {
-        return props.getCallRate();
+        return props.callRate();
     }
 
     public float getSmsPricing() {
-        return props.getSmsRate();
+        return props.smsRate();
     }
 }

@@ -3,6 +3,7 @@ package example.billingjob;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(statements = BillingJobApplicationTests.CREATE_BILLING_TABLE,
 		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @lombok.RequiredArgsConstructor
@@ -66,7 +68,7 @@ class BillingJobApplicationTests {
 	@Test
 	void contextLoads() {
 		assertThat(jobLauncherTestUtils.getJob().getName())
-				.isEqualTo("BillingJob");
+				.isEqualTo("billing-job");
 	}
 
 	@Test

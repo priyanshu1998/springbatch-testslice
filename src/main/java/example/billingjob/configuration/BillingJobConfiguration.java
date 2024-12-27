@@ -18,6 +18,8 @@ import org.springframework.batch.core.Step;
 @ConfigurationPropertiesScan("example.billingjob.configuration.property")
 public class BillingJobConfiguration {
 
+  public static final String BILLING_DATA_TABLE = "billing_data";
+
   // Job ===================================================================================================
   @Bean
   public Job job(JobRepository jobRepository,
@@ -26,7 +28,7 @@ public class BillingJobConfiguration {
                  @Qualifier("generateBillingTotalDataStep") Step readFromRdbmsGenerateBillingTotalDataAsCsvFile) {
     JobParametersValidator validateInputFileParam = new BillingJobParametersValidator();
 
-    return new JobBuilder("BillingJob", jobRepository)
+    return new JobBuilder("billing-job", jobRepository)
             .validator(validateInputFileParam)
             .start(prepareFlatFile)
             .next(ingestBillingDataToRdbms)
