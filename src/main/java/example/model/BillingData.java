@@ -1,29 +1,21 @@
 package example.model;
 
-@lombok.Data
-@lombok.RequiredArgsConstructor
-@lombok.experimental.FieldNameConstants
-public class BillingData {
-    private int dataYear;
-    private int dataMonth;
-    private int accountId;
-    private String phoneNumber;
-    private float dataUsage;
-    private int callDuration;
-    private int smsCount;
+public record BillingData (
+    int dataYear,
+    int dataMonth,
+    int accountId,
+    String phoneNumber,
+    float dataUsage,
+    int callDuration,
+    int smsCount) {
 
-    @lombok.Generated
-    public float dataUsage(){
-        return dataUsage;
-    }
-
-    @lombok.Generated
-    public int callDuration(){
-        return callDuration;
-    }
-
-    @lombok.Generated
-    public int smsCount(){
-        return smsCount;
+    public static class Fields {
+        public static final String DATA_YEAR = "dataYear";
+        public static final String DATA_MONTH = "dataMonth";
+        public static final String ACCOUNT_ID = "accountId";
+        public static final String PHONE_NUMBER = "phoneNumber";
+        public static final String DATA_USAGE = "dataUsage";
+        public static final String CALL_DURATION = "callDuration";
+        public static final String SMS_COUNT = "smsCount";
     }
 }

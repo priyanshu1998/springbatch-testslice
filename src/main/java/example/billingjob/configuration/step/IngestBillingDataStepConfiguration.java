@@ -70,13 +70,13 @@ public class IngestBillingDataStepConfiguration {
             @Value("#{jobParameters['input.file']}") String inputFile) {
 
         String[] orderedColNames = {
-                BillingData.Fields.dataYear,
-                BillingData.Fields.dataMonth,
-                BillingData.Fields.accountId,
-                BillingData.Fields.phoneNumber,
-                BillingData.Fields.dataUsage,
-                BillingData.Fields.callDuration,
-                BillingData.Fields.smsCount};
+                BillingData.Fields.DATA_YEAR,
+                BillingData.Fields.DATA_MONTH,
+                BillingData.Fields.ACCOUNT_ID,
+                BillingData.Fields.PHONE_NUMBER ,
+                BillingData.Fields.DATA_USAGE,
+                BillingData.Fields.CALL_DURATION,
+                BillingData.Fields.SMS_COUNT};
 
         log.trace("reader: {}, columns: {}", READER_NAME,Arrays.stream(orderedColNames).reduce((a, b) -> a + "," + b).orElse(""));
         return new FlatFileItemReaderBuilder<BillingData>()

@@ -116,18 +116,17 @@ public class GenerateBillingTotalDataStepConfiguration {
                 .resource(new FileSystemResource(outputFile))
                 .name(WRITER_NAME)
                 .delimited()
-                .sourceType(ReportingData.class)
                 .names(fields)
                 .build();
     }
 
     private String[] getOrderedFields() {
-        List<String> orderedFields = new ArrayList<>(Stream.of(BillingData.Fields.dataYear, BillingData.Fields.dataMonth, BillingData.Fields.accountId,
-                BillingData.Fields.phoneNumber, BillingData.Fields.dataUsage, BillingData.Fields.callDuration, BillingData.Fields.smsCount)
-                .map(field -> String.format("%s.%s", ReportingData.Fields.billingData, field))
+        List<String> orderedFields = new ArrayList<>(Stream.of(BillingData.Fields.DATA_YEAR, BillingData.Fields.DATA_MONTH, BillingData.Fields.ACCOUNT_ID,
+                BillingData.Fields.PHONE_NUMBER, BillingData.Fields.DATA_USAGE, BillingData.Fields.CALL_DURATION, BillingData.Fields.SMS_COUNT)
+                .map(field -> String.format("%s.%s", ReportingData.Fields.BILLING_DATA , field))
                 .toList());
 
-        orderedFields.add(ReportingData.Fields.billingTotal);
+        orderedFields.add(ReportingData.Fields.BILLING_TOTAL);
         log.trace("fields: {}", orderedFields.stream().reduce((a, b) -> a + "," + b).orElse(""));
 
         return orderedFields.toArray(String[]::new);

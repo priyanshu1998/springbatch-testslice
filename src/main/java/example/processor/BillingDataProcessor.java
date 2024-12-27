@@ -5,7 +5,6 @@ import example.model.BillingData;
 import example.model.ReportingData;
 import jakarta.annotation.PostConstruct;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Value;
 
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
