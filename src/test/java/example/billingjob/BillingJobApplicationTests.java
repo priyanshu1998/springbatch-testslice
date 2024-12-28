@@ -1,10 +1,13 @@
 package example.billingjob;
 
+import example.billingjob.configuration.BatchConfig;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -13,13 +16,17 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.util.FileSystemUtils;
 
 import javax.sql.DataSource;
 import java.nio.file.Files;
@@ -37,43 +44,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Sql(statements = BillingJobApplicationTests.CREATE_BILLING_TABLE,
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @lombok.RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 class BillingJobApplicationTests {
 
 	private final JobRepositoryTestUtils jobRepositoryTestUtils;
 	private final JobLauncherTestUtils jobLauncherTestUtils;
 
-	public static final String CREATE_BILLING_TABLE = """
-		CREATE TABLE IF NOT EXISTS billing_data (
-			data_year INTEGER,
-			data_month INTEGER,
-			account_id INTEGER,
-			phone_number VARCHAR(12),
-			data_usage DOUBLE PRECISION,
-			call_duration INTEGER,
-			sms_count INTEGER
-		);
-	""";
-
-
-	@BeforeEach
-	void tearDown(@Qualifier("dataSource") DataSource dataSource) {
-		JdbcTemplate template = new JdbcTemplate(dataSource);
-		this.jobRepositoryTestUtils.removeJobExecutions();
-		JdbcTestUtils.deleteFromTables(template, "billing_data");
+	@BeforeAll
+	@lombok.SneakyThrows
+	void init(@Value("embedded.db.location") String folderPath){
+		FileSystemUtils.deleteRecursively(Paths.get(folderPath));
+		jobRepositoryTestUtils.removeJobExecutions();
 	}
 
-
-
 	@Test
-	void contextLoads() {
+	void contextLoads(ApplicationContext context) {
+		// verify no profile is loaded
+		assertThat(context.getBean(Environment.class).getActiveProfiles()).containsExactly("test");
+
 		assertThat(jobLauncherTestUtils.getJob().getName())
 				.isEqualTo("billing-job");
 	}
 
 	@Test
+	@Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	void testJobExecution(@Qualifier("dataSource") DataSource dataSource) throws Exception {
 		// given
 		JobParameters jobParameters = new JobParametersBuilder()
