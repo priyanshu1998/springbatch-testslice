@@ -1,17 +1,15 @@
-package example.validator;
+package example.blueprint.infrastructure.validator;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
-
 
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-@Slf4j
+@lombok.extern.slf4j.Slf4j
 public class BillingJobParametersValidator implements JobParametersValidator {
 
     private void checkIfFileExists(String inputFile) throws FileNotFoundException {
@@ -23,7 +21,7 @@ public class BillingJobParametersValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
 
-        log.info("Validating job parameters");
+        log.debug("Validating job parameters");
         try {
             String inputFile = parameters.getString("input.file");
             checkIfFileExists(inputFile);

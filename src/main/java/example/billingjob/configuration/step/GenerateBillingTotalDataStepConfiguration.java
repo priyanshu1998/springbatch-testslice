@@ -1,10 +1,11 @@
 package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BillingJobConfiguration;
-import example.exception.PricingException;
-import example.model.BillingData;
-import example.model.ReportingData;
-import example.processor.BillingDataProcessor;
+import example.blueprint.exception.PricingException;
+import example.blueprint.infrastructure.mapper.ReportingDataFieldSetMapper;
+import example.blueprint.infrastructure.data.BillingData;
+import example.blueprint.infrastructure.data.ReportingData;
+import example.blueprint.processor.BillingDataProcessor;
 import example.billingjob.service.PricingService;
 
 import org.springframework.batch.core.Step;
@@ -16,6 +17,7 @@ import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.file.transform.FieldExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +56,7 @@ import java.util.stream.Stream;
  *             <tr>
  *                 <td> Transform </td>
  *                 <td> {@link #billingDataProcessor billingDataProcessor }</td>
- *                 <td> {@link example.processor.BillingDataProcessor BillingDataProcessor} </td>
+ *                 <td> {@link BillingDataProcessor BillingDataProcessor} </td>
  *             </tr>
  *             <tr>
  *                 <td> Sink </td>
@@ -111,12 +113,13 @@ public class GenerateBillingTotalDataStepConfiguration {
         log.debug("writer: {},  outputFile: {}", WRITER_NAME, outputFile);
 
         String[] fields = getOrderedFields();
+        FieldExtractor<ReportingData> reportingDataFieldSetMapper = new ReportingDataFieldSetMapper(fields);
 
         return new FlatFileItemWriterBuilder<ReportingData>()
                 .resource(new FileSystemResource(outputFile))
                 .name(WRITER_NAME)
                 .delimited()
-                .names(fields)
+                .fieldExtractor(reportingDataFieldSetMapper)
                 .build();
     }
 

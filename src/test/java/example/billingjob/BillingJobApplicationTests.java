@@ -12,6 +12,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +21,7 @@ import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
+import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,7 +44,6 @@ class BillingJobApplicationTests {
 
 	private final JobRepositoryTestUtils jobRepositoryTestUtils;
 	private final JobLauncherTestUtils jobLauncherTestUtils;
-	private final JdbcTemplate jdbcTemplate;
 
 	public static final String CREATE_BILLING_TABLE = """
 		CREATE TABLE IF NOT EXISTS billing_data (
@@ -58,9 +59,10 @@ class BillingJobApplicationTests {
 
 
 	@BeforeEach
-	void tearDown() {
+	void tearDown(@Qualifier("dataSource") DataSource dataSource) {
+		JdbcTemplate template = new JdbcTemplate(dataSource);
 		this.jobRepositoryTestUtils.removeJobExecutions();
-		JdbcTestUtils.deleteFromTables(jdbcTemplate, "billing_data");
+		JdbcTestUtils.deleteFromTables(template, "billing_data");
 	}
 
 
@@ -72,7 +74,7 @@ class BillingJobApplicationTests {
 	}
 
 	@Test
-	void testJobExecution() throws Exception {
+	void testJobExecution(@Qualifier("dataSource") DataSource dataSource) throws Exception {
 		// given
 		JobParameters jobParameters = new JobParametersBuilder()
 				.addString("input.file", "input/billing-2023-01.csv")
@@ -88,7 +90,8 @@ class BillingJobApplicationTests {
 		Assertions.assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 		Assertions.assertTrue(Files.exists(Paths.get("staging", "billing-2023-01.csv")));
 
-		Assertions.assertEquals(1000, JdbcTestUtils.countRowsInTable(jdbcTemplate, "billing_data"));
+		JdbcTemplate template = new JdbcTemplate(dataSource);
+		Assertions.assertEquals(1000, JdbcTestUtils.countRowsInTable(template, "billing_data"));
 
 		Path billingReport = Paths.get("staging", "billing-report-2023-01.csv");
 		Assertions.assertTrue(Files.exists(billingReport));

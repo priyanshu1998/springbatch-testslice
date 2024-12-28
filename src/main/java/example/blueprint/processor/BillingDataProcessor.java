@@ -1,8 +1,8 @@
-package example.processor;
+package example.blueprint.processor;
 
 import example.billingjob.service.PricingService;
-import example.model.BillingData;
-import example.model.ReportingData;
+import example.blueprint.infrastructure.data.BillingData;
+import example.blueprint.infrastructure.data.ReportingData;
 import jakarta.annotation.PostConstruct;
 import org.springframework.batch.item.ItemProcessor;
 

@@ -8,29 +8,12 @@ import org.springframework.context.annotation.PropertySource;
 @lombok.Data
 @PropertySource("classpath:cellular-plan.properties")
 @ConfigurationProperties(prefix = "cellular.plan")
+@lombok.experimental.Accessors(fluent = true)
 @Slf4j
 public class PricingProperties {
     private float dataRate = 0.01f;
     private float callRate = 0.5f;
     private float smsRate = 0.1f;
-
-    @lombok.Generated
-    public float dataRate(){
-        return dataRate;
-    }
-
-    @lombok.Generated
-    public float callRate(){
-        return callRate;
-    }
-
-    @lombok.Generated
-    public float smsRate(){
-        return smsRate;
-    }
-
-
-
 
     @PostConstruct
     void init(){

@@ -1,7 +1,7 @@
 package example.billingjob.configuration;
 
-import example.listener.BillingDataSkipListener;
-import example.validator.BillingJobParametersValidator;
+import example.blueprint.listener.BillingDataSkipListener;
+import example.blueprint.infrastructure.validator.BillingJobParametersValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.configuration.annotation.StepScope;

@@ -1,6 +1,6 @@
-package example.listener;
+package example.blueprint.listener;
 
-import example.model.BillingData;
+import example.blueprint.infrastructure.data.BillingData;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.lang.NonNull;

@@ -1,4 +1,4 @@
-package example.model;
+package example.blueprint.infrastructure.data;
 
 
 public record ReportingData (

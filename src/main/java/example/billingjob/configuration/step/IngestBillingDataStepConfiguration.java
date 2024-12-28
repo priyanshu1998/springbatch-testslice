@@ -1,7 +1,7 @@
 package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BillingJobConfiguration;
-import example.model.BillingData;
+import example.blueprint.infrastructure.data.BillingData;
 
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;

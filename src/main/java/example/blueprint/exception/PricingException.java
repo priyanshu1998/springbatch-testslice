@@ -1,4 +1,4 @@
-package example.exception;
+package example.blueprint.exception;
 
 public class PricingException extends RuntimeException {
 

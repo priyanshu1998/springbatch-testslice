@@ -1,6 +1,6 @@
 package example.billingjob.configuration.step;
 
-import example.tasklet.FilePreparationTasklet;
+import example.blueprint.tasklet.FilePreparationTasklet;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
