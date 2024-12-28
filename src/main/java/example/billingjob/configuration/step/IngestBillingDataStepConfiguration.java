@@ -3,6 +3,7 @@ package example.billingjob.configuration.step;
 import example.billingjob.configuration.BillingJobConfiguration;
 import example.blueprint.infrastructure.data.BillingData;
 
+import example.blueprint.infrastructure.mapper.BillingDataPreparedStatementMapper;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -92,13 +94,15 @@ public class IngestBillingDataStepConfiguration {
     public JdbcBatchItemWriter<BillingData> billingDataTableWriter(
             DataSource dataSource) {
         String sql = "insert into " + BillingJobConfiguration.BILLING_DATA_TABLE +
-                " values (:dataYear, :dataMonth, :accountId, :phoneNumber, :dataUsage, :callDuration, :smsCount)";
-
+                " (data_year, data_month, account_id, phone_number, data_usage, call_duration, sms_count)" +
+                " values (?, ?, ?, ?, ?, ?, ?)";
+        var billingDataPsMapper = new BillingDataPreparedStatementMapper();
         log.debug("bean name: billingDataTableWriter, sql: {}", sql);
         return new JdbcBatchItemWriterBuilder<BillingData>()
                 .dataSource(dataSource)
+                .namedParametersJdbcTemplate(new NamedParameterJdbcTemplate(dataSource))
                 .sql(sql)
-                .beanMapped()
+                .itemPreparedStatementSetter(billingDataPsMapper)
                 .build();
     }
 

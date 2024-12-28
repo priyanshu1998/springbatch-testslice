@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.batch.core.Step;
+import org.springframework.lang.NonNull;
 
 @Configuration
 @ConfigurationPropertiesScan("example.billingjob.configuration.property")

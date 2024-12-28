@@ -86,8 +86,8 @@ public class GenerateBillingTotalDataStepConfiguration {
             @Value("#{jobParameters['data.year']}") Integer year,
             @Value("#{jobParameters['data.month']}") Integer month) {
 
-        String sql = String.format("select * from " + BillingJobConfiguration.BILLING_DATA_TABLE +
-                " where DATA_YEAR = %d and DATA_MONTH = %d", year, month);
+        String sql = String.format("select * from billing_data where data_year = %d and data_month = %d",
+                year, month);
 
         log.debug("reader: {}, sql: {}", READER_NAME, sql);
         return new JdbcCursorItemReaderBuilder<BillingData>()

@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 		webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @SpringBatchTest
 @ActiveProfiles("test")
-@ExtendWith(OutputCaptureExtension.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @lombok.RequiredArgsConstructor
