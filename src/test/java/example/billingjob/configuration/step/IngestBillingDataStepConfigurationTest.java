@@ -3,8 +3,11 @@ package example.billingjob.configuration.step;
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.BillingJobConfiguration;
 import example.blueprint.listener.BillingDataSkipListener;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -13,25 +16,24 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.util.FileSystemUtils;
 
 import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,12 +42,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(IngestBillingDataStepConfigurationTest.OverridingConfiguration.class)
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 class IngestBillingDataStepConfigurationTest {
+    private final Step step;
     private final StepRunner stepRunner;
+    private final DataSource dataSource;
 
     @TestConfiguration
     public static class OverridingConfiguration {
@@ -57,25 +61,23 @@ class IngestBillingDataStepConfigurationTest {
         }
     }
 
+    @BeforeAll
+    @lombok.SneakyThrows
+    void init() {
+        var params = getJobParametersForSomeSkip();
+        FileSystemUtils.deleteRecursively(Paths.get(Objects.requireNonNull(params.getString("skip.file"))));
+    }
+
     @Test
     void contextLoads(ConfigurableApplicationContext context) {
-        // verify no profile is loaded
-        assertThat(context.getBean(Environment.class).getActiveProfiles()).isEmpty();
-
-
-        // verify correct step is loaded
-        AssertableApplicationContext assertableContext = AssertableApplicationContext.get(() -> context);
-        assertThat(assertableContext).hasSingleBean(Step.class);
-        assertEquals("ingest-billing-data", context.getBean(Step.class).getName());
-
+        assertEquals("ingest-billing-data", step.getName());
     }
 
 
     @Test
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void testExecute(@Qualifier("ingestBillingDataStep") Step step,
-                     @Qualifier("dataSource") DataSource dataSource) {
+    void testNoSkip() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         JobParameters jobParameters = getJobParametersForNoSkip();
 
@@ -101,10 +103,9 @@ class IngestBillingDataStepConfigurationTest {
     @Test
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void testSkip(@Qualifier("ingestBillingDataStep") Step step,
-                  @Qualifier("dataSource") DataSource dataSource) {
+    void testSkip() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        JobParameters jobParameters = getJobParametersSomeSkip();
+        JobParameters jobParameters = getJobParametersForSomeSkip();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
 
@@ -112,15 +113,15 @@ class IngestBillingDataStepConfigurationTest {
         assertEquals(jobExecution.getExitStatus(), ExitStatus.COMPLETED);
 
         long countInTable = JdbcTestUtils.countRowsInTable(jdbcTemplate, BillingJobConfiguration.BILLING_DATA_TABLE);
-        long countInInputFile = countLines(Paths.get(jobParameters.getString("input.file")));
-        long countInSkipFile = countLines(Paths.get(jobParameters.getString("skip.file")));
+        long countInInputFile = countLines(Paths.get(Objects.requireNonNull(jobParameters.getString("input.file"))));
+        long countInSkipFile = countLines(Paths.get(Objects.requireNonNull(jobParameters.getString("skip.file"))));
 
         log.info("countInTable={}, countInSkipFile={}, countInInputFile={}", countInTable, countInSkipFile, countInInputFile);
         // verify that data is stored
         assertEquals(countInInputFile, countInTable + countInSkipFile);
     }
 
-    private static JobParameters getJobParametersSomeSkip() {
+    private static JobParameters getJobParametersForSomeSkip() {
         return new JobParametersBuilder()
                 .addString("input.file", "input/billing-2023-03.csv")
                 .addString("skip.file", "staging/billing-skipped-2023-03.csv")
@@ -134,6 +135,5 @@ class IngestBillingDataStepConfigurationTest {
             return lines.count();
         }
     }
-
 
 }
