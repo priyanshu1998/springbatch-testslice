@@ -108,19 +108,19 @@ public class IngestBillingDataStepConfiguration {
     }
 
     /** Stores data in the {@link BillingJobConfiguration#BILLING_DATA_TABLE BILLING_DATA_TABLE} table
-     * @param fromFlatFile {@link #billingDataFileReader FlatFileItemReader}
-     * @param toRdbmsTable {@link #billingDataTableWriter JdbcBatchItemWriter}
+     * @param fromInputFile {@link #billingDataFileReader FlatFileItemReader}
+     * @param toBillDataTable {@link #billingDataTableWriter JdbcBatchItemWriter}
      * @param skipListener {@link IngestBillingDataStepListenerConfigurations#parseFailListener SkipListener}
      */
     @Bean
     public Step ingestBillingDataStep(
-            @Qualifier("billingDataFileReader") FlatFileItemReader<BillingData> fromFlatFile,
-            @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toRdbmsTable,
+            @Qualifier("billingDataFileReader") FlatFileItemReader<BillingData> fromInputFile,
+            @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toBillDataTable,
             @Qualifier("parseFailListener") SkipListener<BillingData, BillingData> skipListener) {
         return new StepBuilder(STEP_NAME, jobRepository)
                 .<BillingData, BillingData>chunk(100, transactionManager)
-                .reader(fromFlatFile)
-                .writer(toRdbmsTable)
+                .reader(fromInputFile)
+                .writer(toBillDataTable)
                 .faultTolerant()
                 .skip(FlatFileParseException.class)
                 .skipLimit(10)

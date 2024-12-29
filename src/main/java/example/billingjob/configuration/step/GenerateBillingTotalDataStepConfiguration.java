@@ -139,22 +139,22 @@ public class GenerateBillingTotalDataStepConfiguration {
     /**
      * Creates a CSV file that contains all the billing totals.
      *
-     * @param fromRdbms {@link #billingDataTableReader JdbcCursorItemReader}
+     * @param fromBillingDataTable {@link #billingDataTableReader JdbcCursorItemReader}
      * @param calculateTotal {@link #billingDataProcessor ItemProcessor}
-     * @param toFlatFile {@link #billingDataFileWriter FlatFileItemWriter}
+     * @param toOutputFile {@link #billingDataFileWriter FlatFileItemWriter}
      */
     @Bean
     public Step generateBillingTotalDataStep(
-            @Qualifier("billingDataTableReader") JdbcCursorItemReader<BillingData> fromRdbms,
+            @Qualifier("billingDataTableReader") JdbcCursorItemReader<BillingData> fromBillingDataTable,
             @Qualifier("billingDataProcessor") ItemProcessor<BillingData, ReportingData> calculateTotal,
-            @Qualifier("billingDataFileWriter") FlatFileItemWriter<ReportingData> toFlatFile) {
+            @Qualifier("billingDataFileWriter") FlatFileItemWriter<ReportingData> toOutputFile) {
 
 
         return new StepBuilder(STEP_NAME, jobRepository)
                 .<BillingData, ReportingData>chunk(100, transactionManager)
-                .reader(fromRdbms)
+                .reader(fromBillingDataTable)
                 .processor(calculateTotal)
-                .writer(toFlatFile)
+                .writer(toOutputFile)
                 .faultTolerant()
                 .retry(PricingException.class)
                 .retryLimit(100)
