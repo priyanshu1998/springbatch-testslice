@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @lombok.RequiredArgsConstructor
-class FilePreparationStepConfigurationTest {
+class FilePreparationStepTest {
     private final Step step;
     private final StepRunner stepRunner;
 

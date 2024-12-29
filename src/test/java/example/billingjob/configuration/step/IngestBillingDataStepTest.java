@@ -2,7 +2,7 @@ package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.BillingJobConfiguration;
-import example.blueprint.listener.BillingDataSkipListener;
+import example.billingjob.configuration.listener.IngestBillingDataStepListenerConfigurations;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,15 +13,9 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
@@ -40,26 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBatchTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class})
+@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class, IngestBillingDataStepListenerConfigurations.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(IngestBillingDataStepConfigurationTest.OverridingConfiguration.class)
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
-class IngestBillingDataStepConfigurationTest {
+class IngestBillingDataStepTest {
     private final Step step;
     private final StepRunner stepRunner;
     private final DataSource dataSource;
-
-    @TestConfiguration
-    public static class OverridingConfiguration {
-        @Bean
-        @StepScope
-        public BillingDataSkipListener parseFailListener(@Value("#{jobParameters['skip.file']}") String skippedFile) {
-            assertThat(skippedFile).isNotBlank();
-            return new BillingDataSkipListener(skippedFile);
-        }
-    }
 
     @BeforeAll
     @lombok.SneakyThrows
@@ -69,7 +52,7 @@ class IngestBillingDataStepConfigurationTest {
     }
 
     @Test
-    void contextLoads(ConfigurableApplicationContext context) {
+    void contextLoads() {
         assertEquals("ingest-billing-data", step.getName());
     }
 

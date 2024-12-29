@@ -1,6 +1,7 @@
 package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BillingJobConfiguration;
+import example.billingjob.configuration.listener.IngestBillingDataStepListenerConfigurations;
 import example.blueprint.infrastructure.data.BillingData;
 
 import example.blueprint.infrastructure.mapper.BillingDataPreparedStatementMapper;
@@ -51,7 +52,7 @@ import java.util.Arrays;
  *            </tr>
  *            <tr>
  *                <td> Listener </td>
- *                <td> {@link BillingJobConfiguration#parseFailListener parseFailListener}</td>
+ *                <td> {@link IngestBillingDataStepListenerConfigurations#parseFailListener parseFailListener}</td>
  *                <td> SkipListener </td>
  *            </tr>
  *         </tbody>
@@ -109,7 +110,7 @@ public class IngestBillingDataStepConfiguration {
     /** Stores data in the {@link BillingJobConfiguration#BILLING_DATA_TABLE BILLING_DATA_TABLE} table
      * @param fromFlatFile {@link #billingDataFileReader FlatFileItemReader}
      * @param toRdbmsTable {@link #billingDataTableWriter JdbcBatchItemWriter}
-     * @param skipListener {@link BillingJobConfiguration#parseFailListener SkipListener}
+     * @param skipListener {@link IngestBillingDataStepListenerConfigurations#parseFailListener SkipListener}
      */
     @Bean
     public Step ingestBillingDataStep(

@@ -1,14 +1,11 @@
 package example.billingjob.configuration;
 
-import example.blueprint.listener.BillingDataSkipListener;
 import example.blueprint.infrastructure.validator.BillingJobParametersValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,15 +31,6 @@ public class BillingJobConfiguration {
             .next(ingestBillingDataToRdbms)
             .next(readFromRdbmsGenerateBillingTotalDataAsCsvFile)
             .build();
-  }
-
-
-// Listener ==================================================================================================
-
-  @Bean
-  @StepScope
-  public BillingDataSkipListener parseFailListener(@Value("#{jobParameters['skip.file']}") String skippedFile) {
-    return new BillingDataSkipListener(skippedFile);
   }
 }
 
