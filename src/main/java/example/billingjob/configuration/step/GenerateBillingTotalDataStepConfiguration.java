@@ -77,12 +77,12 @@ public class GenerateBillingTotalDataStepConfiguration {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
+    private final DataSource dataSource;
 
     // Step 3 ============================================================================================
     @Bean
     @StepScope
     public JdbcCursorItemReader<BillingData> billingDataTableReader(
-            DataSource dataSource,
             @Value("#{jobParameters['data.year']}") Integer year,
             @Value("#{jobParameters['data.month']}") Integer month) {
 
