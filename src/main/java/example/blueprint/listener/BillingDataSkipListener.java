@@ -13,7 +13,7 @@ import java.nio.file.StandardOpenOption;
 
 public class BillingDataSkipListener implements SkipListener<BillingData, BillingData> {
 
-    Path skippedItemsFile;
+    public Path skippedItemsFile;
 
     public BillingDataSkipListener(String skippedItemsFile) {
         this.skippedItemsFile = Paths.get(skippedItemsFile);
@@ -22,14 +22,18 @@ public class BillingDataSkipListener implements SkipListener<BillingData, Billin
     @Override
     public void onSkipInRead(@NonNull Throwable throwable) {
         if (throwable instanceof FlatFileParseException exception) {
-            String rawLine = exception.getInput();
-            int lineNumber = exception.getLineNumber();
-            String skippedLine = lineNumber + "|" + rawLine + System.lineSeparator();
+            String skippedLine = getSkippedLine(exception);
             try {
                 Files.writeString(this.skippedItemsFile, skippedLine, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
             } catch (IOException e) {
                 throw new RuntimeException("Unable to write skipped item " + skippedLine);
             }
         }
+    }
+
+    private String getSkippedLine(FlatFileParseException exception) {
+        String rawLine = exception.getInput();
+        int lineNumber = exception.getLineNumber();
+        return lineNumber + "|" + rawLine + System.lineSeparator();
     }
 }
