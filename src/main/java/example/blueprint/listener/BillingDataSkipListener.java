@@ -14,7 +14,7 @@ import java.nio.file.StandardOpenOption;
 
 public class BillingDataSkipListener implements SkipListener<BillingData, BillingData> {
 
-    public Path skippedItemsFile;
+    private final Path skippedItemsFile;
 
     public BillingDataSkipListener(String skippedItemsFile) {
         this(Paths.get(skippedItemsFile));

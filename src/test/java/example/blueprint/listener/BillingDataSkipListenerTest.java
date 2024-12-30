@@ -3,7 +3,6 @@ package example.blueprint.listener;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -21,11 +20,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class BillingDataSkipListenerTest {
 
-    @InjectMocks
-    private BillingDataSkipListener skipListener;
+    private final BillingDataSkipListener skipListener;
+    private final Path filePath;
 
-    @Mock
-    private Path filePath;
+    BillingDataSkipListenerTest(@Mock Path filePath){
+        this.filePath = filePath;
+        skipListener = new BillingDataSkipListener(filePath);
+    }
 
     @Test
     void WhenFlatFileParseExceptionOccurs(){
@@ -50,8 +51,8 @@ class BillingDataSkipListenerTest {
 
             assertThatThrownBy(()->skipListener.onSkipInRead(throwable)).isInstanceOf(RuntimeException.class);
 
-            mockedStatic.verify(()->Files.writeString(skipListener.skippedItemsFile,
-                    skipListener.getSkippedLine(throwable), StandardOpenOption.APPEND, StandardOpenOption.CREATE));
+            mockedStatic.verify(()->Files.writeString(filePath, skipListener.getSkippedLine(throwable),
+                    StandardOpenOption.APPEND, StandardOpenOption.CREATE));
         }
     }
 

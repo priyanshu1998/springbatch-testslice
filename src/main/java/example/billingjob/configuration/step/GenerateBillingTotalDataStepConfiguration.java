@@ -101,7 +101,7 @@ public class GenerateBillingTotalDataStepConfiguration {
     @Bean
     public BillingDataProcessor billingDataProcessor(
             PricingService pricingService,
-            @Value("${cellular.plan.spending-threshold:150.0f}") Float spendingThreshold) {
+            @Value("${cellular.plan.spending-threshold:150.0f}") float spendingThreshold) {
 
         return new BillingDataProcessor(pricingService, spendingThreshold);
     }
