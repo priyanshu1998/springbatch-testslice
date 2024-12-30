@@ -1,6 +1,7 @@
 package example.blueprint.listener;
 
 import example.blueprint.infrastructure.data.BillingData;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.lang.NonNull;
@@ -16,7 +17,11 @@ public class BillingDataSkipListener implements SkipListener<BillingData, Billin
     public Path skippedItemsFile;
 
     public BillingDataSkipListener(String skippedItemsFile) {
-        this.skippedItemsFile = Paths.get(skippedItemsFile);
+        this(Paths.get(skippedItemsFile));
+    }
+
+    public BillingDataSkipListener(Path filePath){
+        this.skippedItemsFile = filePath;
     }
 
     @Override
@@ -31,7 +36,8 @@ public class BillingDataSkipListener implements SkipListener<BillingData, Billin
         }
     }
 
-    private String getSkippedLine(FlatFileParseException exception) {
+    @VisibleForTesting
+    String getSkippedLine(FlatFileParseException exception) {
         String rawLine = exception.getInput();
         int lineNumber = exception.getLineNumber();
         return lineNumber + "|" + rawLine + System.lineSeparator();
