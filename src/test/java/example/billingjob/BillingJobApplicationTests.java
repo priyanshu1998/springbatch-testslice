@@ -66,7 +66,7 @@ class BillingJobApplicationTests {
 
 	@Test
 	@Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-//	@Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	void testJobExecution(@Qualifier("dataSource") DataSource dataSource) throws Exception {
 		// given
 		JobParameters jobParameters = new JobParametersBuilder()
