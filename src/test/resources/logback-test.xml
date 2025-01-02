@@ -1,0 +1,45 @@
+<configuration>
+
+    <!--
+        1) Optionally reference an environment variable or system property for log levels.
+           Here, we default Spring Batch logs to DEBUG if none is provided.
+    -->
+    <property scope="context"
+              name="SPRING_BATCH_LOG_LEVEL"
+              defaultValue="DEBUG"
+              value="${env:SPRING_BATCH_LOG_LEVEL:-${sys:SPRING_BATCH_LOG_LEVEL}}"/>
+
+    <!--
+        2) Configure how messages are formatted to the console.
+    -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        3) This logger targets all Spring Batch classes.
+           Set level to the above property, typically DEBUG for detailed logs.
+           If you need finer-grained control, add more loggers for specific packages:
+             - org.springframework.batch.core.step
+             - org.springframework.batch.item
+             - org.springframework.batch.integration
+    -->
+    <logger name="org.springframework.batch" level="${SPRING_BATCH_LOG_LEVEL}" />
+
+    <!--
+        4) If you want to see DEBUG logs for transaction management or JDBC details,
+           add loggers for those packages as well, e.g.:
+           <logger name="org.springframework.transaction" level="DEBUG" />
+           <logger name="org.springframework.jdbc" level="DEBUG" />
+    -->
+
+    <!--
+        5) Keep the ROOT logger at WARN (or INFO) to reduce noise from other frameworks.
+        -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+</configuration>

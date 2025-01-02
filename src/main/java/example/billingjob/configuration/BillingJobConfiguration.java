@@ -13,14 +13,14 @@ import org.springframework.batch.core.Step;
 
 @Configuration
 @ConfigurationPropertiesScan("example.billingjob.configuration.property")
+@lombok.RequiredArgsConstructor
 public class BillingJobConfiguration {
-
+  private final JobRepository jobRepository;
   public static final String BILLING_DATA_TABLE = "billing_data";
 
   // Job ===================================================================================================
   @Bean
-  public Job job(JobRepository jobRepository,
-                 @Qualifier("filePreparationStep") Step prepareFlatFile,
+  public Job job(@Qualifier("filePreparationStep") Step prepareFlatFile,
                  @Qualifier("ingestBillingDataStep") Step ingestBillingDataToRdbms,
                  @Qualifier("generateBillingTotalDataStep") Step readFromRdbmsGenerateBillingTotalDataAsCsvFile) {
     JobParametersValidator validateInputFileParam = new BillingJobParametersValidator();
