@@ -6,7 +6,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
-@Configuration
+/**
+ * IMPORTANT:
+ * There cannot be any @Bean definition method in this class (as proxyBeanMethods = false)
+ * TODO: Enforce this via archunit test.
+ */
+@Configuration(proxyBeanMethods = false)
 @lombok.RequiredArgsConstructor
 @lombok.Getter
 @lombok.experimental.Accessors(fluent = true)

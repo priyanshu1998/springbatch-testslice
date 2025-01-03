@@ -2,15 +2,13 @@ package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.SharedConfiguration;
+import example.billingjob.configuration.property.PricingProperties;
 import example.billingjob.service.PricingService;
 import example.blueprint.infrastructure.data.BillingData;
 import example.blueprint.infrastructure.data.ReportingData;
 import example.blueprint.processor.BillingDataProcessor;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -22,9 +20,9 @@ import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -32,23 +30,23 @@ import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Slf4j
 @SpringBatchTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ExtendWith(OutputCaptureExtension.class)
-@SpringJUnitConfig(classes = {BatchConfig.class, GenerateBillingTotalDataStepConfiguration.ComponentConfiguration.class,
-        PricingService.class, SharedConfiguration.class})
-@ConfigurationPropertiesScan("example.billingjob.configuration.property")
+@SpringJUnitConfig(classes = {GenerateBillingTotalDataStepConfiguration.Components.class,
+        BatchConfig.class, PricingService.class, SharedConfiguration.class})
+@EnableConfigurationProperties(PricingProperties.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @lombok.RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 class GenerateBillingTotalDataStepTest {
     private final StepRunner stepRunner;
     private final JdbcCursorItemReader<BillingData> fromBillingDataTable;
@@ -61,14 +59,26 @@ class GenerateBillingTotalDataStepTest {
                          FlatFileItemWriter<ReportingData> writer) {
         var generateBillingTotalDataStepConfiguration = new GenerateBillingTotalDataStepConfiguration(sharedConfiguration);
 
-        return generateBillingTotalDataStepConfiguration.generateBillingTotalDataStep(
-                reader, processor, writer);
+        return generateBillingTotalDataStepConfiguration.create(reader, processor, writer);
+    }
+
+    private void testContextAssertions(ConfigurableApplicationContext context){
+        AssertableApplicationContext assertableContext = AssertableApplicationContext.get(() -> context);
+
+        // there should be are two beans: `dataSource` and `batchDataSource`
+        assertThat(assertableContext.getBeansOfType(DataSource.class)).hasSize(2)
+                .satisfies(map -> assertTrue(Mockito.mockingDetails(map.get("batchDataSource")).isMock()))
+                .satisfies(map -> assertFalse(Mockito.mockingDetails(map.get("dataSource")).isMock()));
+
+        assertFalse(Mockito.mockingDetails(sharedConfiguration.dataSource()).isMock());
     }
 
 
     
     @Test
-    void contextLoads() {
+    void contextLoads(ConfigurableApplicationContext context) {
+        this.testContextAssertions(context);
+
         Step realObject = this.getStep(fromBillingDataTable, calculateTotal, toOutputFile);
         assertEquals("generate-billing-total-data", realObject.getName());
     }
@@ -122,7 +132,7 @@ class GenerateBillingTotalDataStepTest {
         Path billingReport = Paths.get("staging", "billing-2023-01.csv");
 
         // verify that file is created
-        Assertions.assertTrue(Files.exists(billingReport));
+        assertTrue(Files.exists(billingReport));
     }
 
     private JobParameters getJobParameters() {

@@ -2,6 +2,7 @@ package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.BillingJobConfiguration;
+import example.billingjob.configuration.SharedConfiguration;
 import example.billingjob.configuration.listener.IngestBillingDataStepListenerConfigurations;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +16,6 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.jdbc.Sql;
@@ -23,7 +23,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.util.FileSystemUtils;
 
-import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,8 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBatchTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class, IngestBillingDataStepListenerConfigurations.class})
+@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class,
+        IngestBillingDataStepListenerConfigurations.class, SharedConfiguration.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @lombok.RequiredArgsConstructor
@@ -42,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class IngestBillingDataStepTest {
     private final Step step;
     private final StepRunner stepRunner;
-    private final DataSource dataSource;
+    private final SharedConfiguration sharedConfiguration;
 
     @BeforeAll
     @lombok.SneakyThrows
@@ -61,7 +60,7 @@ class IngestBillingDataStepTest {
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testNoSkip() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(sharedConfiguration.dataSource());
         JobParameters jobParameters = getJobParametersForNoSkip();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
@@ -87,7 +86,7 @@ class IngestBillingDataStepTest {
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testSkip() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(sharedConfiguration.dataSource());
         JobParameters jobParameters = getJobParametersForSomeSkip();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);

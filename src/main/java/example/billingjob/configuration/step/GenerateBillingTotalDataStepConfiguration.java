@@ -11,8 +11,6 @@ import example.billingjob.service.PricingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
@@ -20,17 +18,13 @@ import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuild
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.file.transform.FieldExtractor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.DataClassRowMapper;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -84,14 +78,13 @@ public class GenerateBillingTotalDataStepConfiguration {
 
     @Configuration
     @lombok.RequiredArgsConstructor
-    public static class ComponentConfiguration {
-        private final DataSource dataSource;
+    public static class Components {
         // Step 3 ============================================================================================
         @Bean
         @StepScope
         public JdbcCursorItemReader<BillingData> billingDataTableReader(
                 @Value("#{jobParameters['data.year']}") Integer year,
-                @Value("#{jobParameters['data.month']}") Integer month) {
+                @Value("#{jobParameters['data.month']}") Integer month, SharedConfiguration sharedConfiguration) {
 
             String sql = String.format("select * from billing_data where data_year = %d and data_month = %d",
                     year, month);
@@ -99,7 +92,7 @@ public class GenerateBillingTotalDataStepConfiguration {
             log.debug("reader: {}, sql: {}", READER_NAME, sql);
             return new JdbcCursorItemReaderBuilder<BillingData>()
                     .name(READER_NAME)
-                    .dataSource(dataSource)
+                    .dataSource(sharedConfiguration.dataSource())
                     .sql(sql)
                     .rowMapper(new DataClassRowMapper<>(BillingData.class))
                     .build();
@@ -151,8 +144,8 @@ public class GenerateBillingTotalDataStepConfiguration {
      * @param calculateTotal {@link #billingDataProcessor ItemProcessor}
      * @param toOutputFile {@link #billingDataFileWriter FlatFileItemWriter}
      */
-    @Bean
-    public Step generateBillingTotalDataStep(
+    @Bean("generateBillingTotalDataStep")
+    public Step create(
             @Qualifier("billingDataTableReader") JdbcCursorItemReader<BillingData> fromBillingDataTable,
             @Qualifier("billingDataProcessor") ItemProcessor<BillingData, ReportingData> calculateTotal,
             @Qualifier("billingDataFileWriter") FlatFileItemWriter<ReportingData> toOutputFile) {

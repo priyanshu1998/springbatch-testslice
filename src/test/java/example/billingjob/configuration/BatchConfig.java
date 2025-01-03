@@ -1,5 +1,6 @@
 package example.billingjob.configuration;
 
+import org.mockito.Mockito;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -8,10 +9,12 @@ import org.springframework.batch.support.transaction.ResourcelessTransactionMana
 import org.springframework.batch.test.StepRunner;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
+
 @TestConfiguration
-@EnableBatchProcessing
 public class BatchConfig {
     public static final String CREATE_BILLING_TABLE = """
             	CREATE TABLE IF NOT EXISTS billing_data (
@@ -36,14 +39,32 @@ public class BatchConfig {
         return new StepRunner(jobLauncher, jobRepository);
     }
 
-    @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new ResourcelessTransactionManager();
+    @TestConfiguration
+    @EnableBatchProcessing(dataSourceRef = "batchDataSource")
+    public static class BatchComponents {
+
+        @Bean
+        public PlatformTransactionManager transactionManager() {
+            return new ResourcelessTransactionManager();
+        }
+
+        @Bean
+        public JobRepository jobRepository() {
+            return new ResourcelessJobRepository();
+        }
+
+        @Bean
+        public DataSource batchDataSource() {
+            return Mockito.mock(DataSource.class, invocation -> {
+                throw new RuntimeException("data source referenced");
+            });
+        }
     }
 
-
-    @Bean
-    public JobRepository jobRepository() {
-        return new ResourcelessJobRepository();
+    @Bean("dataSource")
+    public DataSource realDataSource(){
+        return new EmbeddedDatabaseBuilder()
+                .generateUniqueName(true)
+                .build();
     }
 }
