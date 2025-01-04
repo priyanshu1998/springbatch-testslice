@@ -8,7 +8,6 @@ import example.blueprint.infrastructure.data.ReportingData;
 import example.blueprint.processor.BillingDataProcessor;
 import example.billingjob.service.PricingService;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -67,17 +66,16 @@ import java.util.stream.Stream;
  */
 @Configuration
 @lombok.RequiredArgsConstructor
-@Slf4j
+@lombok.extern.slf4j.Slf4j
 @lombok.Getter
 public class GenerateBillingTotalDataStepConfiguration {
     private static final String STEP_NAME = "generate-billing-total-data";
     public static final String READER_NAME = "billing-data-table-reader";
     public static final String WRITER_NAME = "billing-data-file-writer";
 
-    private static final SharedConfiguration sharedConfiguration;
+    private final SharedConfiguration sharedConfiguration;
 
     @Configuration
-    @lombok.RequiredArgsConstructor
     public static class Components {
         // Step 3 ============================================================================================
         @Bean
