@@ -8,10 +8,10 @@ import javax.sql.DataSource;
 
 /**
  * IMPORTANT:
- * There cannot be any @Bean definition method in this class (as proxyBeanMethods = false)
+ * There cannot be any @Bean definition method in this class
  * TODO: Enforce this via archunit test.
  */
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @lombok.RequiredArgsConstructor
 @lombok.Getter
 @lombok.experimental.Accessors(fluent = true)

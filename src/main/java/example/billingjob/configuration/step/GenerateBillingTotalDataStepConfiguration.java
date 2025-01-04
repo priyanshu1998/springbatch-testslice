@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 
 /**
- * Configuration Class for {@link #generateBillingTotalDataStep } Step. ({@value GenerateBillingTotalDataStepConfiguration#STEP_NAME})
+ * Configuration Class for {@link GenerateBillingTotalDataStepConfiguration#create generateBillingTotalDataStep} Step. ({@value GenerateBillingTotalDataStepConfiguration#STEP_NAME})
  * <br>
  * <br>
  *
@@ -47,18 +47,18 @@ import java.util.stream.Stream;
  *         <tbody>
  *             <tr>
  *                 <td> Source </td>
- *                 <td> {@link #billingDataTableReader billingDataTableReader} </td>
+ *                 <td> {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataTableReader billingDataTableReader} </td>
  *                 <td> JdbcCursorItemReader </td>
  *                 <td> {@value GenerateBillingTotalDataStepConfiguration#READER_NAME} </td>
  *             </tr>
  *             <tr>
  *                 <td> Transform </td>
- *                 <td> {@link #billingDataProcessor billingDataProcessor }</td>
+ *                 <td> {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataProcessor billingDataProcessor }</td>
  *                 <td> {@link BillingDataProcessor BillingDataProcessor} </td>
  *             </tr>
  *             <tr>
  *                 <td> Sink </td>
- *                 <td> {@link #billingDataFileWriter billingDataFileWriter}</td>
+ *                 <td> {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataFileWriter billingDataFileWriter}</td>
  *                 <td> FlatFileItemWriter </td>
  *                 <td> {@value GenerateBillingTotalDataStepConfiguration#WRITER_NAME} </td>
  *             </tr>
@@ -74,7 +74,7 @@ public class GenerateBillingTotalDataStepConfiguration {
     public static final String READER_NAME = "billing-data-table-reader";
     public static final String WRITER_NAME = "billing-data-file-writer";
 
-    private final SharedConfiguration sharedConfiguration;
+    private static final SharedConfiguration sharedConfiguration;
 
     @Configuration
     @lombok.RequiredArgsConstructor
@@ -140,9 +140,9 @@ public class GenerateBillingTotalDataStepConfiguration {
     /**
      * Creates a CSV file that contains all the billing totals.
      *
-     * @param fromBillingDataTable {@link #billingDataTableReader JdbcCursorItemReader}
-     * @param calculateTotal {@link #billingDataProcessor ItemProcessor}
-     * @param toOutputFile {@link #billingDataFileWriter FlatFileItemWriter}
+     * @param fromBillingDataTable {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataTableReader JdbcCursorItemReader}
+     * @param calculateTotal {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataProcessor ItemProcessor}
+     * @param toOutputFile {@link GenerateBillingTotalDataStepConfiguration.Components#billingDataFileWriter FlatFileItemWriter}
      */
     @Bean("generateBillingTotalDataStep")
     public Step create(
