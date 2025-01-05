@@ -10,9 +10,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.batch.core.Step;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@ConfigurationPropertiesScan("example.billingjob.configuration.property")
 @lombok.RequiredArgsConstructor
 public class BillingJobConfiguration {
   private final JobRepository jobRepository;

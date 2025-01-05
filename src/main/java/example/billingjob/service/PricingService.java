@@ -2,8 +2,13 @@ package example.billingjob.service;
 import java.util.Random;
 
 import example.billingjob.configuration.property.PricingProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+/**
+ * {@link PricingProperties }
+ */
 @Service
 @lombok.RequiredArgsConstructor
 public class PricingService {

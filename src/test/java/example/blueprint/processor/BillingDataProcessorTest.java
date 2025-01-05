@@ -27,8 +27,6 @@ class BillingDataProcessorTest {
         Mockito.when(pricingService.getCallPricing()).thenReturn(0.5f);
         Mockito.when(pricingService.getSmsPricing()).thenReturn(0.1f);
 
-//        69.87,289,77
-
         BillingData billingData = new BillingData(2023,1,101,"404-555-1001",69.87f,289,77);
         assertNotNull(billingDataProcessor.process(billingData));
     }

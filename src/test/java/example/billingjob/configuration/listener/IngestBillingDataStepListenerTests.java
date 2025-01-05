@@ -2,10 +2,12 @@ package example.billingjob.configuration.listener;
 
 import example.billingjob.configuration.BatchConfig;
 import example.blueprint.listener.BillingDataSkipListener;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.SkipListener;
@@ -14,7 +16,6 @@ import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.FileSystemUtils;
@@ -22,13 +23,13 @@ import org.springframework.util.FileSystemUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.Objects;
 
 @SpringBatchTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepListenerConfigurations.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepListenerConfigurations.class})
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 class IngestBillingDataStepListenerTests {

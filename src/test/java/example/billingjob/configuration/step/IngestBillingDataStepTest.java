@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBatchTest
-@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class,
-        IngestBillingDataStepListenerConfigurations.class, SharedConfiguration.class})
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class,
+        IngestBillingDataStepListenerConfigurations.class, SharedConfiguration.class})
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 class IngestBillingDataStepTest {
