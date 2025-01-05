@@ -29,7 +29,7 @@ import javax.sql.DataSource;
 import java.util.Arrays;
 
 /**
- * Configuration class for {@link #ingestBillingDataStep} Step. ({@value IngestBillingDataStepConfiguration#STEP_NAME})
+ * Configuration class for {@link #create ingestBillingDataStep} Step. ({@value IngestBillingDataStepConfiguration#STEP_NAME})
  * <br><br>
  * <table >
  *         <thead>
@@ -116,8 +116,8 @@ public class IngestBillingDataStepConfiguration {
      * @param toBillDataTable {@link #writer JdbcBatchItemWriter}
      * @param skipListener {@link IngestBillingDataStepListenerConfigurations#skipListener SkipListener}
      */
-    @Bean
-    public Step ingestBillingDataStep(
+    @Bean(IngestBillingDataStep.STEP)
+    public Step create(
             @Qualifier(IngestBillingDataStep.READER)                    FlatFileItemReader<BillingData> fromInputFile,
             @Qualifier(IngestBillingDataStep.WRITER)                    JdbcBatchItemWriter<BillingData> toBillDataTable,
             @Qualifier(IngestBillingDataStep.SKIP_LISTENER)    SkipListener<BillingData, BillingData> skipListener) {

@@ -1,6 +1,7 @@
 package example.billingjob.configuration;
 
 public class BillingJobBeanDirectory {
+
     public static class FilePreparationStep {
         public static final String STEP = "filePreparationStep";
     }
@@ -9,6 +10,8 @@ public class BillingJobBeanDirectory {
         public static final String READER = "billingDataFileReader";
         public static final String WRITER = "billingDataTableWriter";
         public static final String SKIP_LISTENER = "parseFailListener";
+
+        public static final String STEP = "ingestBillingDataStep";
     }
 
     public static class GenerateBillingTotalDataStep {
