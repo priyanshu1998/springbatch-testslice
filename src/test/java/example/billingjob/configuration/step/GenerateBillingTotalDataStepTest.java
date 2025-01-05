@@ -2,7 +2,6 @@ package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.BillingJobBeanDirectory.GenerateBillingTotalDataStep;
-import example.billingjob.configuration.SharedConfiguration;
 import example.billingjob.service.PricingService;
 
 import example.blueprint.infrastructure.data.BillingData;
@@ -46,12 +45,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(classes = {GenerateBillingTotalDataStepConfiguration.class,
-        BatchConfig.class, PricingService.class, SharedConfiguration.class})
+        BatchConfig.class, PricingService.class})
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 class GenerateBillingTotalDataStepTest {
     private final Step step;
     private final StepRunner stepRunner;
+    private final DataSource dataSource;
 
     @MockitoBean(value= GenerateBillingTotalDataStep.READER)
     private final JdbcCursorItemReader<BillingData> fromBillingDataTable;
@@ -60,7 +60,6 @@ class GenerateBillingTotalDataStepTest {
 
 //    @MockitoBean(value= GenerateBillingTotalDataStep.WRITER)
     private final FlatFileItemWriter<ReportingData> toOutputFile;
-    private final SharedConfiguration sharedConfiguration;
 
     private void testContextAssertions(ConfigurableApplicationContext context){
         AssertableApplicationContext assertableContext = AssertableApplicationContext.get(() -> context);
@@ -70,7 +69,7 @@ class GenerateBillingTotalDataStepTest {
                 .satisfies(map -> assertTrue(Mockito.mockingDetails(map.get("batchDataSource")).isMock()))
                 .satisfies(map -> assertFalse(Mockito.mockingDetails(map.get("dataSource")).isMock()));
 
-        assertFalse(Mockito.mockingDetails(sharedConfiguration.dataSource()).isMock());
+        assertFalse(Mockito.mockingDetails(dataSource).isMock());
     }
 
 
@@ -109,7 +108,7 @@ class GenerateBillingTotalDataStepTest {
     private void populateDatabase(){
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
         databasePopulator.addScript(new ClassPathResource("populate-billing.sql"));
-        DatabasePopulatorUtils.execute(databasePopulator, sharedConfiguration.dataSource());
+        DatabasePopulatorUtils.execute(databasePopulator, dataSource);
     }
 
 //    @Test

@@ -5,6 +5,8 @@ import example.billingjob.configuration.listener.IngestBillingDataStepListenerCo
 import example.blueprint.infrastructure.data.BillingData;
 
 import example.blueprint.infrastructure.mapper.BillingDataPreparedStatementMapper;
+import example.billingjob.configuration.BillingJobBeanDirectory.IngestBillingDataStep;
+
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -34,26 +36,28 @@ import java.util.Arrays;
  *             <tr>
  *                 <th> Operator </th>
  *                 <th> Bean Name </th>
- *                 <th> Bean Type </th>
+ *                 <th> Bean Definition </th>
  *                 <th> DB Reference </th>
  *             </tr>
  *         </thead>
  *         <tbody>
  *            <tr>
  *                <td> Source </td>
- *                <td> {@link #billingDataFileReader billingDataFileReader} </td>
- *                <td> FlatFileItemReader </td>
+ *                <td> {@value IngestBillingDataStep#READER}</td>
+ *                <td> {@link #reader FlatFileItemReader} </td>
  *                <td> {@value IngestBillingDataStepConfiguration#READER_NAME }</td>
  *            </tr>
  *            <tr>
  *                <td> Sink </td>
- *                <td> {@link #billingDataTableWriter billingDataTableWriter} </td>
- *                <td> JdbcBatchItemWriter </td>
+ *                <td> {@value IngestBillingDataStep#WRITER}</td>
+ *                <td> {@link #writer JdbcBatchItemWriter} </td>
+ *                <td>  </td>
  *            </tr>
  *            <tr>
  *                <td> Listener </td>
- *                <td> {@link IngestBillingDataStepListenerConfigurations#parseFailListener parseFailListener}</td>
- *                <td> SkipListener </td>
+ *                <td> {@value IngestBillingDataStep#SKIP_LISTENER} </td>
+ *                <td> {@link IngestBillingDataStepListenerConfigurations#skipListener SkipListener}</td>
+ *                <td>  </td>
  *            </tr>
  *         </tbody>
  * </table>
@@ -64,12 +68,13 @@ import java.util.Arrays;
 public class IngestBillingDataStepConfiguration {
     public static final String READER_NAME = "billing-data-file-reader";
     public static final String STEP_NAME = "ingest-billing-data";
+
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
-    @Bean
+    @Bean(IngestBillingDataStep.READER)
     @StepScope
-    public FlatFileItemReader<BillingData> billingDataFileReader(
+    public FlatFileItemReader<BillingData> reader(
             @Value("#{jobParameters['input.file']}") String inputFile) {
 
         String[] orderedColNames = {
@@ -91,9 +96,8 @@ public class IngestBillingDataStepConfiguration {
                 .build();
     }
 
-    @Bean
-    public JdbcBatchItemWriter<BillingData> billingDataTableWriter(
-            DataSource dataSource) {
+    @Bean(IngestBillingDataStep.WRITER)
+    public JdbcBatchItemWriter<BillingData> writer(DataSource dataSource) {
         String sql = "insert into " + BillingJobConfiguration.BILLING_DATA_TABLE +
                 " (data_year, data_month, account_id, phone_number, data_usage, call_duration, sms_count)" +
                 " values (?, ?, ?, ?, ?, ?, ?)";
@@ -108,15 +112,15 @@ public class IngestBillingDataStepConfiguration {
     }
 
     /** Stores data in the {@link BillingJobConfiguration#BILLING_DATA_TABLE BILLING_DATA_TABLE} table
-     * @param fromInputFile {@link #billingDataFileReader FlatFileItemReader}
-     * @param toBillDataTable {@link #billingDataTableWriter JdbcBatchItemWriter}
-     * @param skipListener {@link IngestBillingDataStepListenerConfigurations#parseFailListener SkipListener}
+     * @param fromInputFile {@link #reader FlatFileItemReader}
+     * @param toBillDataTable {@link #writer JdbcBatchItemWriter}
+     * @param skipListener {@link IngestBillingDataStepListenerConfigurations#skipListener SkipListener}
      */
     @Bean
     public Step ingestBillingDataStep(
-            @Qualifier("billingDataFileReader") FlatFileItemReader<BillingData> fromInputFile,
-            @Qualifier("billingDataTableWriter") JdbcBatchItemWriter<BillingData> toBillDataTable,
-            @Qualifier("parseFailListener") SkipListener<BillingData, BillingData> skipListener) {
+            @Qualifier(IngestBillingDataStep.READER)                    FlatFileItemReader<BillingData> fromInputFile,
+            @Qualifier(IngestBillingDataStep.WRITER)                    JdbcBatchItemWriter<BillingData> toBillDataTable,
+            @Qualifier(IngestBillingDataStep.SKIP_LISTENER)    SkipListener<BillingData, BillingData> skipListener) {
         return new StepBuilder(STEP_NAME, jobRepository)
                 .<BillingData, BillingData>chunk(100, transactionManager)
                 .reader(fromInputFile)

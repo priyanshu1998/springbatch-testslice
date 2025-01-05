@@ -57,7 +57,7 @@ import java.util.stream.Stream;
  *                 <td> {@value GenerateBillingTotalDataStepConfiguration#READER_NAME} </td>
  *             </tr>
  *             <tr>
- *                 <td> Transform </td>
+ *                 <td> Transform & Filter </td>
  *                 <td> {@value GenerateBillingTotalDataStep#PROCESSOR}  </td>
  *                 <td> {@link GenerateBillingTotalDataStepConfiguration#processor BillingDataProcessor }</td>
  *             </tr>

@@ -2,7 +2,6 @@ package example.billingjob.configuration.step;
 
 import example.billingjob.configuration.BatchConfig;
 import example.billingjob.configuration.BillingJobConfiguration;
-import example.billingjob.configuration.SharedConfiguration;
 import example.billingjob.configuration.listener.IngestBillingDataStepListenerConfigurations;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.util.FileSystemUtils;
 
+import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,13 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(classes = {BatchConfig.class, IngestBillingDataStepConfiguration.class,
-        IngestBillingDataStepListenerConfigurations.class, SharedConfiguration.class})
+        IngestBillingDataStepListenerConfigurations.class})
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 class IngestBillingDataStepTest {
     private final Step step;
     private final StepRunner stepRunner;
-    private final SharedConfiguration sharedConfiguration;
+    private final DataSource dataSource;
 
     @BeforeAll
     @lombok.SneakyThrows
@@ -60,7 +60,7 @@ class IngestBillingDataStepTest {
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testNoSkip() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(sharedConfiguration.dataSource());
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         JobParameters jobParameters = getJobParametersForNoSkip();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
@@ -86,7 +86,7 @@ class IngestBillingDataStepTest {
     @Sql(statements = BatchConfig.CREATE_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = BatchConfig.DROP_BILLING_TABLE, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testSkip() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(sharedConfiguration.dataSource());
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         JobParameters jobParameters = getJobParametersForSomeSkip();
 
         JobExecution jobExecution = stepRunner.launchStep(step, jobParameters);
