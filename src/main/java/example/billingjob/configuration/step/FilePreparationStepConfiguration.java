@@ -1,6 +1,5 @@
 package example.billingjob.configuration.step;
 
-import example.billingjob.configuration.BillingJobBeanDirectory.FilePreparationStep ;
 import example.blueprint.tasklet.FilePreparationTasklet;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -9,10 +8,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+/**
+ * Bean Name : {@value FilePreparationStep#STEP} <br>
+ * Operator  : Stateful Operation <br>
+ * Idempotent: YES <br>
+ */
 @Configuration
 @lombok.RequiredArgsConstructor
 public class FilePreparationStepConfiguration {
-    public static final String STEP_NAME = "file-preparation";
+
+    public static class FilePreparationStep {
+        public static final String STEP_NAME = "file-preparation";
+        public static final String STEP = "filePreparationStep";
+    }
+
 
     private final JobRepository repository;
     private final PlatformTransactionManager transactionManager;
@@ -20,7 +29,7 @@ public class FilePreparationStepConfiguration {
     // Step1 ========================================================================================================
     @Bean(FilePreparationStep.STEP)
     public Step create(){
-        return new StepBuilder(STEP_NAME, repository)
+        return new StepBuilder(FilePreparationStep.STEP_NAME, repository)
                 .tasklet(new FilePreparationTasklet(), transactionManager)
                 .build();
     }

@@ -7,7 +7,6 @@ import example.blueprint.infrastructure.data.BillingData;
 import example.blueprint.infrastructure.data.ReportingData;
 import example.blueprint.processor.BillingDataProcessor;
 import example.billingjob.service.PricingService;
-import example.billingjob.configuration.BillingJobBeanDirectory.GenerateBillingTotalDataStep;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -76,6 +75,14 @@ import java.util.stream.Stream;
 @EnableConfigurationProperties(PricingProperties.class)
 @PropertySource("classpath:cellular-plan.properties")
 public class GenerateBillingTotalDataStepConfiguration {
+    public static class GenerateBillingTotalDataStep {
+        public static final String READER = "billingDataTableReader";
+        public static final String PROCESSOR = "billingDataProcessor";
+        public static final String WRITER = "billingDataFileWriter";
+
+        public static final String STEP = "generateBillingTotalDataStep";
+    }
+
     private static final String STEP_NAME = "generate-billing-total-data";
     public static final String READER_NAME = "billing-data-table-reader";
     public static final String WRITER_NAME = "billing-data-file-writer";

@@ -2,8 +2,8 @@ package example.billingjob.configuration.step.mocked;
 
 
 import example.billingjob.configuration.BatchConfig;
-import example.billingjob.configuration.BillingJobBeanDirectory.GenerateBillingTotalDataStep;
 import example.billingjob.configuration.step.GenerateBillingTotalDataStepConfiguration;
+import example.billingjob.configuration.step.GenerateBillingTotalDataStepConfiguration.GenerateBillingTotalDataStep;
 import example.billingjob.service.PricingService;
 import example.blueprint.infrastructure.data.BillingData;
 import example.blueprint.infrastructure.data.ReportingData;

@@ -5,7 +5,6 @@ import example.billingjob.configuration.listener.IngestBillingDataStepListenerCo
 import example.blueprint.infrastructure.data.BillingData;
 
 import example.blueprint.infrastructure.mapper.BillingDataPreparedStatementMapper;
-import example.billingjob.configuration.BillingJobBeanDirectory.IngestBillingDataStep;
 
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
@@ -66,6 +65,13 @@ import java.util.Arrays;
 @lombok.RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 public class IngestBillingDataStepConfiguration {
+    public static class IngestBillingDataStep {
+        public static final String READER = "billingDataFileReader";
+        public static final String WRITER = "billingDataTableWriter";
+        public static final String SKIP_LISTENER = "parseFailListener";
+
+        public static final String STEP = "ingestBillingDataStep";
+    }
     public static final String READER_NAME = "billing-data-file-reader";
     public static final String STEP_NAME = "ingest-billing-data";
 

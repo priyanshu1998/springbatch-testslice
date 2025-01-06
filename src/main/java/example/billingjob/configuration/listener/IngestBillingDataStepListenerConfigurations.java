@@ -1,6 +1,6 @@
 package example.billingjob.configuration.listener;
 
-import example.billingjob.configuration.BillingJobBeanDirectory.IngestBillingDataStep;
+import example.billingjob.configuration.step.IngestBillingDataStepConfiguration.IngestBillingDataStep;
 import example.blueprint.listener.BillingDataSkipListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
